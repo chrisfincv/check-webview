@@ -17,9 +17,25 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
+    signingConfigs {
         release {
+            // key was generated using `keytool -genkey -v -keystore etc/keystore.jks -alias release -keyalg RSA -keysize 2048 -validity 10000`
+            storeFile file("../../keystore")
+            keyAlias 'My Keystore'
+            storePassword property("storePassword")
+            keyPassword property("releaseKeyPassword")
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
             minifyEnabled false
+        }
+        release {
+            debuggable false
+            minifyEnabled true
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
