@@ -1,13 +1,21 @@
 package net.chris.tools.checkwebview
 
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
+import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import androidx.webkit.WebViewCompat
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.disposables.Disposable
@@ -22,41 +30,93 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
+    val loadingView = findViewById<View>(R.id.loading)
+    val button = findViewById<AppCompatButton>(R.id.check)
     val checkAndroidWebView = findViewById<CheckBox>(R.id.android_webview)
     val checkGoogleWebView = findViewById<CheckBox>(R.id.google_webview)
-    val loadingView = findViewById<View>(R.id.loading)
+    val checkOtherWebView = findViewById<CheckBox>(R.id.other_webview_label)
+    val systemWebView = findViewById<TextView>(R.id.system_webview_value)
+    val otherWebViews = findViewById<RecyclerView>(R.id.other_webviews).also {
+      it.layoutManager = LinearLayoutManager(this)
+    }
 
-    findViewById<AppCompatButton>(R.id.check).setOnClickListener {
-      if (::disposable.isInitialized) {
-        disposable.dispose()
-      }
-      disposable = Single.fromCallable {
-        packageManager.getInstalledPackages(0)
-          .filter { it.packageName.contains(".webview", ignoreCase = true) }
-      }
+    button.setOnClickListener {
+      dispose()
+      disposable = Single.zip(
+        Single.fromCallable { getWebViewRelevantPackageInfos() },
+        Single.fromCallable { WebViewCompat.getCurrentWebViewPackage(this)?.packageName },
+        { list, packageName -> Pair(list, packageName) }
+      )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe {
           loadingView.visibility = VISIBLE
+          systemWebView.text = null
           checkAndroidWebView.isChecked = false
           checkGoogleWebView.isChecked = false
+          checkOtherWebView.isChecked = false
         }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnTerminate { loadingView.visibility = GONE }
+        .doOnTerminate {
+          button.isEnabled = true
+          loadingView.visibility = GONE
+        }
         .subscribeBy(
-          onSuccess = {
-            for (packageInfo in it) {
+          onSuccess = { (list, packageName) ->
+            systemWebView.text = packageName
+            val otherPackages = mutableListOf<String>()
+            for (packageInfo in list) {
               when (packageInfo.packageName) {
                 ANDROID_WEBVIEW -> checkAndroidWebView.isChecked = true
                 GOOGLE_WEBVIEW  -> checkGoogleWebView.isChecked = true
+                else            -> otherPackages.add(packageInfo.packageName)
               }
             }
+            checkOtherWebView.isChecked = otherPackages.isNotEmpty()
+            updateOtherPackages(otherWebViews, otherPackages)
           },
           onError = {
+            Log.e("get webview packages", "failed", it)
             Toast.makeText(this, "check webview packages failed", Toast.LENGTH_SHORT).show()
           }
         )
     }
   }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    dispose()
+  }
+
+  override fun onBackPressed() {
+    super.onBackPressed()
+    finish()
+  }
+
+  private fun dispose() {
+    if (::disposable.isInitialized) {
+      disposable.dispose()
+    }
+  }
+
+  private fun updateOtherPackages(otherWebViews: RecyclerView, otherPackages: List<String>) {
+    otherWebViews.adapter = object : RecyclerView.Adapter<ViewHolder>() {
+
+      override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        OtherPackageViewHolder(
+          LayoutInflater.from(parent.context).inflate(R.layout.item_other_package, parent, false)
+        )
+
+      override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.itemView.findViewById<TextView>(R.id.position)?.text = "${position + 1}"
+        holder.itemView.findViewById<TextView>(R.id.content)?.text = otherPackages[position]
+      }
+
+      override fun getItemCount(): Int = otherPackages.size
+    }
+  }
+
+  private fun getWebViewRelevantPackageInfos() = packageManager.getInstalledPackages(0)
+    .filter { it.packageName.contains(".webview", ignoreCase = true) }
 
   companion object {
     private const val ANDROID_WEBVIEW = "com.android.webview"

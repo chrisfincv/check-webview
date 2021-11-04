@@ -3,4 +3,7 @@
   <string name="check_it_now">Check it now</string>
   <string name="android_webview">com.android.webview</string>
   <string name="google_webview">com.google.android.webview</string>
+  <string name="system_webview_label">System WebView:</string>
+  <string name="installed_webviews">Installed WebViews</string>
+  <string name="other_webviews">Other WebViews</string>
 </resources>

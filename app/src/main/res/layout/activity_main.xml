@@ -4,13 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="16dp"
     tools:context=".MainActivity">
 
   <androidx.appcompat.widget.AppCompatButton
       android:id="@+id/check"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="48dp"
+      android:layout_marginTop="24dp"
       android:text="@string/check_it_now"
       android:textAppearance="@style/TextAppearance.AppCompat.Large"
       android:textStyle="bold"
@@ -18,20 +19,53 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="parent" />
 
+  <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/system_webview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="@string/system_webview_label"
+      android:textAppearance="@style/TextAppearance.AppCompat.Large"
+      android:textStyle="bold"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/check" />
+
+  <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/system_webview_value"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:text="@string/system_webview_label"
+      android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+      android:textStyle="italic"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/system_webview"
+      tools:text="@string/google_webview" />
+
+  <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/installed_webview"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="16dp"
+      android:text="@string/installed_webviews"
+      android:textAppearance="@style/TextAppearance.AppCompat.Large"
+      android:textStyle="bold"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/system_webview_value" />
+
   <CheckBox
       android:id="@+id/android_webview"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="24dp"
+      android:layout_marginTop="8dp"
       android:button="@drawable/check_icon"
-      android:buttonTint="#ff0000"
       android:checked="false"
       android:clickable="false"
       android:text="@string/android_webview"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
       android:textStyle="bold|italic"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/check" />
+      app:layout_constraintTop_toBottomOf="@+id/installed_webview" />
 
   <CheckBox
       android:id="@+id/google_webview"
@@ -39,7 +73,6 @@
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
       android:button="@drawable/check_icon"
-      android:buttonTint="#ff0000"
       android:checked="false"
       android:clickable="false"
       android:text="@string/google_webview"
@@ -47,6 +80,32 @@
       android:textStyle="bold|italic"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/android_webview" />
+
+  <CheckBox
+      android:id="@+id/other_webview_label"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:button="@drawable/check_icon"
+      android:checked="false"
+      android:clickable="false"
+      android:text="@string/other_webviews"
+      android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+      android:textStyle="bold|italic"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/google_webview" />
+
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/other_webviews"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_marginStart="36dp"
+      android:layout_marginTop="8dp"
+      android:background="@color/white"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/other_webview_label" />
 
   <FrameLayout
       android:id="@+id/loading"
