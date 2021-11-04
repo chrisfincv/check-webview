@@ -35,12 +35,22 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_marginTop="8dp"
-      android:text="@string/system_webview_label"
       android:textAppearance="@style/TextAppearance.AppCompat.Medium"
       android:textStyle="italic"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toBottomOf="@+id/system_webview"
       tools:text="@string/google_webview" />
+
+  <androidx.appcompat.widget.AppCompatTextView
+      android:id="@+id/system_webview_version"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+      android:textStyle="italic"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/system_webview_value"
+      tools:text="87.0.4280.141" />
 
   <androidx.appcompat.widget.AppCompatTextView
       android:id="@+id/installed_webview"
@@ -51,7 +61,7 @@
       android:textAppearance="@style/TextAppearance.AppCompat.Large"
       android:textStyle="bold"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/system_webview_value" />
+      app:layout_constraintTop_toBottomOf="@+id/system_webview_version" />
 
   <CheckBox
       android:id="@+id/android_webview"

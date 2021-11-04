@@ -1,5 +1,6 @@
 package net.chris.tools.checkwebview
 
+import android.content.pm.PackageInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,6 +8,7 @@ import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
@@ -32,10 +34,11 @@ class MainActivity : AppCompatActivity() {
 
     val loadingView = findViewById<View>(R.id.loading)
     val button = findViewById<AppCompatButton>(R.id.check)
+    val systemWebView = findViewById<TextView>(R.id.system_webview_value)
+    val systemWebViewVersion = findViewById<TextView>(R.id.system_webview_version)
     val checkAndroidWebView = findViewById<CheckBox>(R.id.android_webview)
     val checkGoogleWebView = findViewById<CheckBox>(R.id.google_webview)
     val checkOtherWebView = findViewById<CheckBox>(R.id.other_webview_label)
-    val systemWebView = findViewById<TextView>(R.id.system_webview_value)
     val otherWebViews = findViewById<RecyclerView>(R.id.other_webviews).also {
       it.layoutManager = LinearLayoutManager(this)
     }
@@ -45,7 +48,20 @@ class MainActivity : AppCompatActivity() {
       disposable = Single.zip(
         Single.fromCallable { getWebViewRelevantPackageInfos() },
         Single.fromCallable { WebViewCompat.getCurrentWebViewPackage(this)?.packageName },
-        { list, packageName -> Pair(list, packageName) }
+        Single.fromCallable { WebSettings.getDefaultUserAgent(this) }
+          .map {
+            it.split(" ")
+              .find { it.contains("chrome", true) }
+              ?.split('/')
+              ?.getOrNull(1)
+          },
+        { list, packageName, userAgent ->
+          WebViewInfor(
+            packageInforList = list,
+            systemWebViewPackageName = packageName,
+            userAgent = userAgent
+          )
+        }
       )
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -61,8 +77,9 @@ class MainActivity : AppCompatActivity() {
           loadingView.visibility = GONE
         }
         .subscribeBy(
-          onSuccess = { (list, packageName) ->
+          onSuccess = { (list, packageName, version) ->
             systemWebView.text = packageName
+            systemWebViewVersion.text = version
             val otherPackages = mutableListOf<String>()
             for (packageInfo in list) {
               when (packageInfo.packageName) {
@@ -122,4 +139,10 @@ class MainActivity : AppCompatActivity() {
     private const val ANDROID_WEBVIEW = "com.android.webview"
     private const val GOOGLE_WEBVIEW = "com.google.android.webview"
   }
+
+  private data class WebViewInfor(
+    val packageInforList: List<PackageInfo>,
+    val systemWebViewPackageName: String?,
+    val userAgent: String?
+  )
 }
